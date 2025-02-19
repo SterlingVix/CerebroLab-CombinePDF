@@ -131,8 +131,8 @@ dist
 
 #########
 # PDF Docs
-pdf-in
-pdf-out
+pdf-in/*
+pdf-out/*
 
 # MacOS
 .DS_Store

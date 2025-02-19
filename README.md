@@ -5,47 +5,33 @@ See for reference:
 - https://apple.stackexchange.com/questions/230437/how-can-i-combine-multiple-pdfs-using-the-command-line/365073#365073
 - https://github.com/coherentgraphics/cpdf-binaries
 
-# Install
+# Setting up this repo
+
+## Script permissions
+* mergepdfs.zsh needs to be made executable:
+  ```bash
+  chmod +x mergepdfs.zsh
+  ```
+
+## Update / Set up PDFs locally
+* Download `Research References` as a .zip from Google Drive to this repo.
+* Unzip `Research References` inside `pdf-in`.
+** Your file structure should be:
+  ```bash
+  - CerebroLab-CombinePDF
+  -- pdf-in
+  --- Research References
+  ---- ... all the sub dirs.
+  ```
+
+## Install cpdf
 * Download cpdf
 * Install
-** For MacOS: copy `cpdf` from `OSX-ARM/cpdf` (for non-Intel) to `usr/local/bin`.
+** For MacOS: copy `cpdf` from `OSX-ARM/cpdf` (for non-Intel) to `usr/local/bin` or another directory accessible in your $PATH.
 
 # Merge PDFs
-* Download `Research References` from Google Drive to this repo.
-* 
+* from the root of the repo, execute the `mergepdfs.zsh` script:
+  ```bash
+  ./mergepdfs.zsh
+  ```
 
-* mergepdfs.zsh needs to be made executable:
-** `chmod +x mergepdfs.zsh`
-
-
-```
-# Scan current directory, cd into first folder
-cd "$(find . -maxdepth 1 -type d | sed -n '2p')"
-```
-
-
-```
-# List all files in the current directory
-find "INPUT FOLDER" -maxdepth 1 -type f -exec basename {} \; | tr '\n' ' '
-
-# Print all files in this dir wrapped in quotes.
-printf '"%s" ' *.*(N)
-```
-
-
-```
-# Merge the files into a new pdf "out.pdf".
-cpdf -merge in.pdf in2.pdf -o out.pdf
-
-# Merge files retrieved programatically from this directory.
-cpdf -merge $(printf '"%s" ' *.*(N)) -o out.pdf
-
-# Write the line to the CLI (debugging)
-echo "cpdf -merge $(printf '"%s" ' *.*(N)) -o out.pdf"
-```
-
-printf '"%s" ' *.*(N)
-
-
-
-cpdf -merge TDP-43 and Phosphorylated TDP-43 Levels in Paired Plasma and CSF Samples in Amyotrophic Lateral Sclerosis.pdf Mitigation of TDP-43 toxic phenotype by an RGNEF fragment in amyotrophic lateral sclerosis models.pdf _ PROTEIN AGGREGATES.pdf Aqp4 stop codon readthrough facilitates amyloidclearance from the brain.pdf Suvorexant acutely decreases tau phosphorylation and Aβ in the human CNS.pdf -o out.pdf
