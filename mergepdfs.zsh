@@ -40,9 +40,9 @@ for dir in */; do
   fi
   mkdir "$COVER_PAGE_FOLDER_NAME"
 
-  # Transform docs to add titled cover page with
+  # Transform pdf docs to add titled cover page with
   #  delimiters and build concatenated final filenames.
-  for file in *; do
+  for file in *.pdf; do
     [[ "$file" == "$COVER_PAGE" ]] && continue  # Skip COVER_PAGE
     [[ "$file" == "$PADDED_FOLDER_NAME" ]] && continue  # Skip temp padded folder
     [[ "$file" == "$COVER_PAGE_FOLDER_NAME" ]] && continue  # Skip temp cover page folder
@@ -56,10 +56,10 @@ for dir in */; do
 
     echo "...adding text to cover page..."
     COVER_PAGE_FILE=\"$COVER_PAGE_FOLDER_NAME/$file\"
-    COVER_PAGE_COMMAND="cpdf -add-text \"\n\n******\n\n$file\n\n******\n\n\" $PADDED_FILE -o $COVER_PAGE_FILE"
+    COVER_PAGE_COMMAND="cpdf -add-text \"\n\n******\n\n$file\n\n******\n\n\" -font \"Courier\" $PADDED_FILE 1, -o $COVER_PAGE_FILE"
     eval "$COVER_PAGE_COMMAND"
 
-    FILES_TO_MERGE="$FILES_TO_MERGE $COVER_PAGE_FILE"    
+    FILES_TO_MERGE="$FILES_TO_MERGE $COVER_PAGE_FILE"
   done
   
   # Create the merged file.
