@@ -17,48 +17,56 @@ for dir in */; do
   # Remove the trailing slash to get the directory name
   CURRENT_DIR="${dir%/}"
 
-  # Change into the directory and populate the temporary folder.
-  cd "$CURRENT_DIR" || continue
-
-  TEMP_FOLDER_NAME="temp"
-
-  # Remove any existing temp dir.
-  if [[ -d "$TEMP_FOLDER_NAME" ]]; then
-    echo "Removing \"$TEMP_FOLDER_NAME\" dir."
-    rm -r $TEMP_FOLDER_NAME
-  fi
-  mkdir "$TEMP_FOLDER_NAME"
-  sleep 1
-
   # Store Cover Page and Output Filename in variables.
   COVER_PAGE="_ $CURRENT_DIR.pdf"
-  # FILES_TO_MERGE="\"$COVER_PAGE\"" # Populate first filename to merge from the Cover Page info.
   FILES_TO_MERGE=""
   OUTPUT_FILENAME=\"$OUTPUT_DIR/$CURRENT_DIR.pdf\"
-  
 
-  # Collect filenames but omit the one matching COVER_PAGE
+  # Change into the directory and populate the temporary folders.
+  cd "$CURRENT_DIR" || continue
+
+  # Remove any existing padded & cover page temp dirs.
+  PADDED_FOLDER_NAME="_padded"
+  if [[ -d "$PADDED_FOLDER_NAME" ]]; then
+    echo "Removing \"$PADDED_FOLDER_NAME\" dir."
+    rm -r $PADDED_FOLDER_NAME
+  fi
+  mkdir "$PADDED_FOLDER_NAME"
+
+  COVER_PAGE_FOLDER_NAME="_cover"
+  if [[ -d "$COVER_PAGE_FOLDER_NAME" ]]; then
+    echo "Removing \"$COVER_PAGE_FOLDER_NAME\" dir."
+    rm -r $COVER_PAGE_FOLDER_NAME
+  fi
+  mkdir "$COVER_PAGE_FOLDER_NAME"
+
+  # Transform docs to add titled cover page with
+  #  delimiters and build concatenated final filenames.
   for file in *; do
     [[ "$file" == "$COVER_PAGE" ]] && continue  # Skip COVER_PAGE
-    [[ "$file" == "$TEMP_FOLDER_NAME" ]] && continue  # Skip temp folder
-    # FILES_TO_MERGE="$FILES_TO_MERGE \"$file\""
-    TEMP_FILE=\"$TEMP_FOLDER_NAME/$file\"
+    [[ "$file" == "$PADDED_FOLDER_NAME" ]] && continue  # Skip temp padded folder
+    [[ "$file" == "$COVER_PAGE_FOLDER_NAME" ]] && continue  # Skip temp cover page folder
 
-    echo "Creating padded temp file $TEMP_FILE"
-
-    PAD_COMMAND="cpdf -pad-before \"$file\" 1, -o $TEMP_FILE"
+    echo ""
+    echo "Transforming file \"$file\":"
+    echo "...adding cover page..."
+    PADDED_FILE=\"$PADDED_FOLDER_NAME/$file\"
+    PAD_COMMAND="cpdf -pad-before \"$file\" 1, -o $PADDED_FILE"
     eval "$PAD_COMMAND"
-    sleep 1
 
-    FILES_TO_MERGE="$FILES_TO_MERGE $TEMP_FILE"    
+    echo "...adding text to cover page..."
+    COVER_PAGE_FILE=\"$COVER_PAGE_FOLDER_NAME/$file\"
+    COVER_PAGE_COMMAND="cpdf -add-text \"\n\n******\n\n$file\n\n******\n\n\" $PADDED_FILE -o $COVER_PAGE_FILE"
+    eval "$COVER_PAGE_COMMAND"
+
+    FILES_TO_MERGE="$FILES_TO_MERGE $COVER_PAGE_FILE"    
   done
-
-  echo "--> Creating file $OUTPUT_FILENAME."
+  
+  # Create the merged file.
   echo ""
-
+  echo "  --> Creating file $OUTPUT_FILENAME."
   merge_command="cpdf -merge $FILES_TO_MERGE -o $OUTPUT_FILENAME"
   eval "$merge_command"
-  # echo "$merge_command"
 
   # Return to the previous directory
   sleep 1
