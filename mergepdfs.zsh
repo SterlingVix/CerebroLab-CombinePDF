@@ -17,11 +17,18 @@ for dir in */; do
   # Remove the trailing slash to get the directory name
   CURRENT_DIR="${dir%/}"
 
-  # # Assign directory name to a variable
-  # CURRENT_DIR="$dirname"
-
-  # Change into the directory
+  # Change into the directory and populate the temporary folder.
   cd "$CURRENT_DIR" || continue
+
+  TEMP_FOLDER_NAME="temp"
+
+  # Remove any existing temp dir.
+  if [[ -d "$TEMP_FOLDER_NAME" ]]; then
+    echo "Removing \"$TEMP_FOLDER_NAME\" dir."
+    rm -r $TEMP_FOLDER_NAME
+  fi
+  mkdir "$TEMP_FOLDER_NAME"
+  sleep 1
 
   # Store Cover Page and Output Filename in variables.
   COVER_PAGE="_ $CURRENT_DIR.pdf"
@@ -33,15 +40,23 @@ for dir in */; do
   # Collect filenames but omit the one matching COVER_PAGE
   for file in *; do
     [[ "$file" == "$COVER_PAGE" ]] && continue  # Skip COVER_PAGE
-    FILES_TO_MERGE="$FILES_TO_MERGE \"$file\""
+    [[ "$file" == "$TEMP_FOLDER_NAME" ]] && continue  # Skip temp folder
+    # FILES_TO_MERGE="$FILES_TO_MERGE \"$file\""
+    TEMP_FILE=\"$TEMP_FOLDER_NAME/$file\"
+
+    echo "Creating padded temp file $TEMP_FILE"
+
+    PAD_COMMAND="cpdf -pad-before \"$file\" 1, -o $TEMP_FILE"
+    eval "$PAD_COMMAND"
+    sleep 1
+
+    FILES_TO_MERGE="$FILES_TO_MERGE $TEMP_FILE"    
   done
 
+  echo "--> Creating file $OUTPUT_FILENAME."
   echo ""
-  echo "Creating file $OUTPUT_FILENAME."
 
-  merge_command="cpdf -decrypt $FILES_TO_MERGE \
-AND -decrypt-force $FILES_TO_MERGE \
-AND -merge $FILES_TO_MERGE -o $OUTPUT_FILENAME"
+  merge_command="cpdf -merge $FILES_TO_MERGE -o $OUTPUT_FILENAME"
   eval "$merge_command"
   # echo "$merge_command"
 
