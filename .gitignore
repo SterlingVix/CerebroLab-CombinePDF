@@ -136,3 +136,6 @@ pdf-out/*
 
 # MacOS
 .DS_Store
+
+# Webstorm .idea dir
+.idea
